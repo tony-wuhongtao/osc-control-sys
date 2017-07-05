@@ -14,13 +14,27 @@ port.on("message", function (oscMessage) {
 
 port.open();
 
-var oscAddress = "/hello/from/oscjs";
+var oscTestAddress = "/hello/from/oscjs";
 var value = "world";
 
 var sayHello = function () {
     port.send({
-        address: oscAddress,
+        address: oscTestAddress,
         args: [value]
     });
-    console.log("send", value, " to ", oscAddress);
+    console.log("send", value, " to ", oscTestAddress);
+};
+
+var oscd3PlayAddress = "/d3/showcontrol/play";
+var value = 1;
+var d3Play = function () {
+    port.send({
+        address: oscd3PlayAddress,
+        args: [
+        {
+        	type: "f",
+        	value: value
+        }]
+    });
+    console.log("send", value, " to ", oscd3PlayAddress);
 };
