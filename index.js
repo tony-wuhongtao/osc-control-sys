@@ -1,12 +1,24 @@
-
-var deviceAddress = "127.0.0.1";
-var devicePort = 1121; 
-var wsPort = 8081;
-
-
-
 var osc = require("osc"),
     WebSocket = require("ws");
+    http = require("http"),
+    url = require('url'),
+    path = require('path'),
+    express = require('express');
+    
+var app = express();
+
+app.use(express.static(path.join(__dirname, '/')));
+
+app.get('/', function (req, res) {
+  console.log(__dirname);
+  res.sendFile(path.join(__dirname+'/index.html'));
+});
+
+app.listen(8080, function () {
+  console.log("http server running at http://127.0.0.1:8080/");
+});
+
+
 
 var getIPAddresses = function () {
     var os = require("os"),
@@ -31,8 +43,8 @@ var getIPAddresses = function () {
 var udp = new osc.UDPPort({
     localAddress: "0.0.0.0",
     localPort: 7400,
-    remoteAddress: deviceAddress,
-    remotePort: devicePort
+    remoteAddress: "localhost",
+    remotePort: 7500
 });
 
 udp.on("ready", function () {
@@ -50,7 +62,7 @@ udp.on("ready", function () {
 udp.open();
 
 var wss = new WebSocket.Server({
-    port: wsPort
+    port: 8081
 });
 
 wss.on("connection", function (socket) {

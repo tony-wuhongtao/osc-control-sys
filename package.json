@@ -10,7 +10,9 @@
         "url": ""
     },
     "dependencies": {
+        "express": "^4.15.3",
         "osc": "2.2.0",
+        "prevent-overscroll": "^0.1.0",
         "ws": "1.1.0"
     }
 }
