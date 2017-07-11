@@ -4,7 +4,7 @@ var osc = require("osc"),
     url = require('url'),
     path = require('path'),
     express = require('express');
-    
+
 var app = express();
 
 app.use(express.static(path.join(__dirname, '/')));
@@ -43,7 +43,7 @@ var getIPAddresses = function () {
 var udp = new osc.UDPPort({
     localAddress: "0.0.0.0",
     localPort: 7400,
-    remoteAddress: "localhost",
+    remoteAddress: "192.168.31.2",
     remotePort: 7500
 });
 

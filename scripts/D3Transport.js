@@ -116,6 +116,34 @@ function D3Transport() {
     console.log("/d3/showcontrol/nexttrack");
   };
 
+  D3Transport.prototype.cue = function (cueLevel1) {
+    this.port.send({
+        address: "/d3/showcontrol/cue",
+        args: [
+        {
+        	type: "i",
+        	value: cueLevel1
+        }]
+    });
+    console.log("/d3/showcontrol/cue " + cueLevel1);
+  };
+  /*
+  D3Transport.prototype.cue = function (cueLevel1, cueLevel2) {
+    this.port.send({
+        address: "/d3/showcontrol/cue",
+        args: [
+        {
+        	type: "i",
+        	value: cueLevel1
+        },
+        {
+          type: "i",
+          value: cueLevel2
+        }]
+    });
+    console.log("/d3/showcontrol/cue " + cueLevel1 + " " + cueLevel2);
+  };
+
   D3Transport.prototype.cue = function (cueLevel1, cueLevel2, cueLevel3) {
     this.port.send({
         address: "/d3/showcontrol/cue",
@@ -135,6 +163,7 @@ function D3Transport() {
     });
     console.log("/d3/showcontrol/cue " + cueLevel1 + " " + cueLevel2 + " " + cueLevel3);
   };
+  */
 
   D3Transport.prototype.fadeUp = function () {
     this.port.send({

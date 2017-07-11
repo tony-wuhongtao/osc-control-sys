@@ -2,6 +2,7 @@ var img;
 var bgimg;
 var lantern;
 var dragVal = 0;
+var triggered = false;
 
 function preload() {
   img = loadImage('assets/lantern.png');
@@ -12,7 +13,7 @@ function setup() {
   createCanvas(document.body.clientWidth, window.innerHeight);
   //imageMode(CENTER);
   rectMode(CENTER);
-  lantern = new Lantern(750, 1118);
+  lantern = new Lantern(document.body.clientWidth/2, window.innerHeight/2);
   console.log(document.body.clientWidth);
   console.log(document.body.clientHeight);
 }
@@ -27,6 +28,10 @@ function draw() {
   }
   lantern.update();
   lantern.display();
+  if (lantern.position.y < 0 && triggered == false) {
+    d3.cue(1);
+    triggered = true;
+  }
 }
 
 /*
