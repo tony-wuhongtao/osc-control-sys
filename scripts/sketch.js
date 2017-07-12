@@ -3,6 +3,7 @@ var bgimg;
 var lantern;
 var dragVal = 0;
 var triggered = false;
+var touch;
 
 function preload() {
   img = loadImage('assets/lantern.png');
@@ -10,17 +11,17 @@ function preload() {
 }
 
 function setup() {
-  createCanvas(document.body.clientWidth, window.innerHeight);
-  //imageMode(CENTER);
+  createCanvas(windowWidth, windowHeight);
+  imageMode(CENTER);
   rectMode(CENTER);
-  lantern = new Lantern(document.body.clientWidth/2, window.innerHeight/2);
-  console.log(document.body.clientWidth);
-  console.log(document.body.clientHeight);
+  lantern = new Lantern(windowWidth/2, windowHeight*2/3);
+  console.log(windowWidth);
+  console.log(windowHeight);
 }
 
 function draw() {
   background(0);
-  image(bgimg, 0, 0, document.body.clientWidth, window.innerHeight);
+  image(bgimg, windowWidth/2, windowHeight/2, windowWidth, windowHeight);
 
   if(lantern.launchStatus) {
     var floating = createVector(0, -0.05);
@@ -45,13 +46,17 @@ function keyTyped() {
     myText += key;
 }
 */
+function touchStarted() {
+  touch = createVector(mouseX, mouseY);
+}
 
-function mouseDragged() {
-  dragVal += 5;
-  if (dragVal > 50) {
+function touchMoved() {
+  var diff = touch.y - mouseY;
+  console.log(diff);
+  if (diff > 100) {
     lantern.launch();
   }
-  value = 0;
+  return false;
 }
 
 var Lantern = function(x, y) {

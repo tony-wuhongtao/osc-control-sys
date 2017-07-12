@@ -3,3 +3,7 @@ function cue() {
   var cueButton = document.getElementById('cueButton');
   d3.cue(cues[0].value, cues[1].value, cues[2].value);
 }
+
+document.body.addEventListener('touchmove',function(event){
+  event.preventDefault();
+});
