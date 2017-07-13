@@ -1,13 +1,38 @@
 var img;
 var bgimg;
+var loadingimg;
+var loadingCount = 0;
+
 var touch;
+var loading = true;
+
 var xoff = 0;
 var noiseInc = 0.05;
+
 var gallery = new Gallery(3);
+var imgs = new Array(3);
 
 function preload() {
-  //img = loadImage('assets/Floater.png');
-  //bgimg = loadImage('assets/background.png');
+  loadingimg = loadImage('assets/loading.gif', function () {
+    loadingCount++;
+    if (loadingCount == 5) {
+      loading = false;
+    }
+  });
+  for (var i = 0; i < imgs.length; i++) {
+    imgs[i] = loadImage('assets/' + 'lantern' + i + '.png', function () {
+      loadingCount++;
+      if (loadingCount == 5) {
+        loading = false;
+      }
+    });
+  }
+  bgimg =loadImage('assets/background.png', function () {
+    loadingCount++;
+    if (loadingCount == 5) {
+      loading = false;
+    }
+  });
 }
 
 function setup() {
@@ -17,13 +42,17 @@ function setup() {
   colorMode(RGB, 255, 255, 255, 255);
   textSize(60);
   textAlign(CENTER);
+
   gallery.init();
 }
 
 function draw() {
-  background(0);
-  //image(bgimg, windowWidth/2, windowHeight/2, windowWidth, windowHeight);
-  gallery.render();
+  if (loading) {
+    image(loadingimg, windowWidth/2, windowHeight/2, windowWidth, windowHeight);
+  } else {
+    image(bgimg, windowWidth/2, windowHeight/2, windowWidth, windowHeight);
+    gallery.render();
+  }
 
 }
 
@@ -71,14 +100,13 @@ function Gallery(n) {
       //
       var xoff = index-((this.floaters.length-1)/2);
       this.slots[index] = windowWidth/2 + offset * xoff;
-      this.floaters[index] = new Floater(this.slots[index], windowHeight*2/3, this.selected == index, index);
+      this.floaters[index] = new Floater(this.slots[index], windowHeight*3/4, imgs[index], this.selected == index, index);
     }
   };
 
   Gallery.prototype.swipe = function (direction) {
     // update selected floater index
     this.selected = (this.selected - direction + this.floaters.length) % this.floaters.length;
-    console.log(this.selected);
 
     // update individual floater's destination slot index
     for (var currentIndex = 0; currentIndex < this.floaters.length; currentIndex++) {
@@ -120,15 +148,17 @@ function Gallery(n) {
       // floater move out of upper border
       if (floater.position.y < 0) {
         // pop up a hint to refresh
-        fill(255);
-        stroke(4);
+        fill(255, 0, 0);
+        stroke(0);
+        strokeWeight(4);
         // animation text
-        textSize(60 + (sin(xoff) - 0.5)*3);
+        textSize(80 + (sin(xoff) - 0.5)*3);
         xoff += noiseInc;
-        text("Please Refresh!", windowWidth/2, windowHeight/3);
+        text("REDLINE Tech", windowWidth/2, windowHeight/3);
         if (!this.triggered) {
           // fire a message
           console.log("BOW!");
+          d3.cue(i);
         }
         this.triggered = true;
       }
@@ -148,7 +178,7 @@ function Gallery(n) {
 }
 
 
-function Floater(xPos, yPos, isSelected, destSlotLocation) {
+function Floater(xPos, yPos, img, isSelected, destSlotLocation) {
 
   // motion-wise properties
   this.position = createVector(xPos, yPos);
@@ -168,7 +198,8 @@ function Floater(xPos, yPos, isSelected, destSlotLocation) {
 
   Floater.prototype.render = function () {
     // display image
-    //image(this.img, this.position.x, this.position.y, this.img.width, this.img.height);
+    image(this.img, this.position.x, this.position.y, this.img.width, this.img.height);
+    /*
     if (this.selected) {
       stroke(255);
       strokeWeight(8);
@@ -178,6 +209,7 @@ function Floater(xPos, yPos, isSelected, destSlotLocation) {
 
     fill(this.c);
     rect(this.position.x, this.position.y, 200, 200);
+    */
   };
 
   Floater.prototype.update = function() {
@@ -197,6 +229,10 @@ function Floater(xPos, yPos, isSelected, destSlotLocation) {
     if (this.position.x > windowWidth*1.5) {
       this.position.x = -windowWidth*0.5;
     }
+  };
+
+  Floater.prototype.fire = function () {
+    this.acceleration.add(force);
   };
 
 }

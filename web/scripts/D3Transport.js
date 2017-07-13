@@ -1,7 +1,7 @@
 function D3Transport() {
   this.port = new osc.WebSocketPort({
     // the server IP
-      url: "ws://192.168.1.104:8081"
+      url: "ws://192.168.31.166:8081"
   });
 
   D3Transport.prototype.init = function () {
