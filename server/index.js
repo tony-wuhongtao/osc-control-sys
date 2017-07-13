@@ -7,7 +7,7 @@ var osc = require("osc"),
 
 var app = express();
 
-app.use(express.static(path.join(__dirname, '/')));
+app.use(express.static(path.join(__dirname, '../web')));
 
 app.get('/', function (req, res) {
   console.log(__dirname);
