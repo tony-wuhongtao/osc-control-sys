@@ -1,13 +1,30 @@
-
-var deviceAddress = "127.0.0.1";
-var devicePort = 1121; 
-var wsPort = 8081;
-
-
-
 var osc = require("osc"),
     WebSocket = require("ws");
+    http = require("http"),
+    url = require('url'),
+    path = require('path'),
+    express = require('express');
 
+
+/*---- Express server ----*/
+var app = express();
+
+// serve static file
+app.use(express.static(path.join(__dirname, '../web')));
+
+// root router
+app.get('/', function (req, res) {
+  console.log(__dirname);
+  res.sendFile(path.join(__dirname+'/index.html'));
+});
+
+// listen on port 8080
+app.listen(8080, function () {
+  console.log("http server running at http://127.0.0.1:8080/");
+});
+
+
+// helper function to get local IP address
 var getIPAddresses = function () {
     var os = require("os"),
     interfaces = os.networkInterfaces(),
@@ -28,11 +45,12 @@ var getIPAddresses = function () {
     return ipAddresses;
 };
 
+/*---- Set up UDP establish ----*/
 var udp = new osc.UDPPort({
     localAddress: "0.0.0.0",
     localPort: 7400,
-    remoteAddress: deviceAddress,
-    remotePort: devicePort
+    remoteAddress: "192.168.31.2",
+    remotePort: 7500
 });
 
 udp.on("ready", function () {
@@ -49,8 +67,10 @@ udp.on("ready", function () {
 
 udp.open();
 
+
+/*---- Setup WebSocket establish ----*/
 var wss = new WebSocket.Server({
-    port: wsPort
+    port: 8081
 });
 
 wss.on("connection", function (socket) {
@@ -59,7 +79,7 @@ wss.on("connection", function (socket) {
         socket: socket
     });
 
-//Websocket <-> UDP
+//relay UDP to WebSocket
     var relay = new osc.Relay(udp, socketPort, {
         raw: true
     });
