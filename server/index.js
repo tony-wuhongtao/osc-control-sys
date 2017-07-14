@@ -79,6 +79,10 @@ wss.on("connection", function (socket) {
         socket: socket
     });
 
+    socketPort.on("message", function (oscMsg) {
+      console.log("An OSC message was received: " + oscMsg);
+    });
+
 //relay UDP to WebSocket
     var relay = new osc.Relay(udp, socketPort, {
         raw: true
