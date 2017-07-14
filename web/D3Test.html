@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>OSC Controller Demo</title>
+        <meta charset="UTF-8" />
+        <script src="bower_components/jquery/dist/jquery.js"></script>
+        <script src="bower_components/osc.js/dist/osc-browser.min.js"></script>
+        <script type="text/javascript" src="scripts/D3Transport.js"></script>
+        <script type="text/javascript" src="scripts/main.js"></script>
+        <script type="text/javascript" src="scripts/p5.js"></script>
+        <!--
+        <script type="text/javascript" src="scripts/sketch.js"></script>
+        !-->
+        <link rel="stylesheet" href="bower_components/bootstrap/dist/css/bootstrap.css">
+    </head>
+
+    <body>
+      <div class="container-fluid">
+
+
+        <div class="jumbotron">
+          <h1>D3 Transport Control Test Page</h1>
+        </div>
+
+        <!--<button onclick="sayHello()">Send Hello Test OSC message</button>!-->
+        <div class="row">
+          <div class="btn-group" role="group">
+            <button class="btn btn-default col-md-3" onclick="d3.play()">Play</button>
+            <button class="btn btn-default col-md-3" onclick="d3.playToEndOfSection()">Play To End OfSection</button>
+            <button class="btn btn-default col-md-3" onclick="d3.loopSection()">Loop Section</button>
+            <button class="btn btn-default col-md-3" onclick="d3.stop()">Stop</button>
+          </div>
+        </div>
+
+        <div class="row">
+          <div class="btn-group" role="group">
+            <button class="btn btn-default col-md-4" type="button" onclick="d3.previousSection()">Previous Section</button>
+            <button class="btn btn-default col-md-4" type="button" onclick="d3.nextSection()">Next Section</button>
+            <button class="btn btn-default col-md-4" type="button" onclick="d3.returnToStart()">Return To Start</button>
+          </div>
+        </div>
+
+        <div class="row">
+          <div class="btn-group" role="group">
+            <button class="btn btn-default col-md-3" type="button" onclick="d3.previousTrack()">Previous Track</button>
+            <button class="btn btn-default col-md-3" type="button" onclick="d3.nextTrack()">Next Track</button>
+            <button class="btn btn-default col-md-3" type="button" onclick="d3.fadeUp()">Fade Up</button>
+            <button class="btn btn-default col-md-3" type="button" onclick="d3.fadeDown()">Fade Down</button>
+          </div>
+        </div>
+
+        <div class="row">
+          <div class="input-group" id="cue">
+            <input class="btn btn-default col-md-3" type="number" name="cueGroup">.</input>
+            <input class="btn btn-default col-md-3" type="number" name="cueGroup">.</input>
+            <input class="btn btn-default col-md-3" type="number" name="cueGroup"></input>
+            <button class="btn btn-default col-md-3" type="button" onclick="cue()" id="cueButton">Cue</button>
+          </div>
+        </div>
+
+        <div class="row">
+          <input class="col-md-6" type="range" min="0" max="255" onmouseup="d3.volume(this)">Volume</input>
+          <input class="col-md-6"type="range" min="0" max="255" onmouseup="d3.brightness(this)">Brightness</input>
+        </div>
+
+      </div>
+    </body>
+</html>

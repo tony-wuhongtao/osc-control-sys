@@ -1,66 +1,89 @@
-
-var deviceAddress = "127.0.0.1";
-var devicePort = 1121; 
-var wsPort = 8081;
-
-
-
 var osc = require("osc"),
     WebSocket = require("ws");
+    http = require("http"),
+    url = require('url'),
+    path = require('path'),
+    express = require('express');
 
-var getIPAddresses = function () {
-    var os = require("os"),
-    interfaces = os.networkInterfaces(),
-    ipAddresses = [];
+  // helper function to get local IP address
+  var getIPAddresses = function () {
+      var os = require("os"),
+      interfaces = os.networkInterfaces(),
+      ipAddresses = [];
 
-    for (var deviceName in interfaces){
-        var addresses = interfaces[deviceName];
+      for (var deviceName in interfaces){
+          var addresses = interfaces[deviceName];
 
-        for (var i = 0; i < addresses.length; i++) {
-            var addressInfo = addresses[i];
+          for (var i = 0; i < addresses.length; i++) {
+              var addressInfo = addresses[i];
 
-            if (addressInfo.family === "IPv4" && !addressInfo.internal) {
-                ipAddresses.push(addressInfo.address);
-            }
-        }
-    }
+              if (addressInfo.family === "IPv4" && !addressInfo.internal) {
+                  ipAddresses.push(addressInfo.address);
+              }
+          }
+      }
 
-    return ipAddresses;
-};
+      return ipAddresses;
+  };
 
-var udp = new osc.UDPPort({
-    localAddress: "0.0.0.0",
-    localPort: 7400,
-    remoteAddress: deviceAddress,
-    remotePort: devicePort
+
+/*---- Express server ----*/
+var app = express();
+
+// serve static file
+app.use(express.static(path.join(__dirname, '../web')));
+
+// root router
+app.get('/', function (req, res) {
+  console.log(__dirname);
+  res.sendFile(path.join(__dirname+'/index.html'));
 });
 
-udp.on("ready", function () {
-    var ipAddresses = getIPAddresses();
-    console.log("===Receive====");
-    console.log("Listening for OSC over UDP.");
-    ipAddresses.forEach(function (address) {
-        console.log(" Host:", address + ", Port:", udp.options.localPort);
-    });
-    console.log("==============");
-    console.log("=====Send=====");
-    console.log("Broadcasting OSC over UDP to", udp.options.remoteAddress + ", Port:", udp.options.remotePort);
+// listen localhost on port 8080
+app.listen(8080, function () {
+  console.log("http server running at http://localhost:8080/");
 });
 
-udp.open();
-
+/*---- Setup WebSocket establish ----*/
+var wsPort = 8081;
 var wss = new WebSocket.Server({
     port: wsPort
 });
 
 wss.on("connection", function (socket) {
-    console.log("A Web Socket connection has been established!");
+    console.log("WebSocketServer:(connection established)");
+    console.log("\tlisten from:" + wsPort);
     var socketPort = new osc.WebSocketPort({
         socket: socket
     });
 
-//Websocket <-> UDP
+    socketPort.on("message", function (oscMsg) {
+      console.log("WebSocketServer:(OSC message received) " + oscMsg.address + " " + oscMsg.args);
+    });
+
+//relay UDP to WebSocket
     var relay = new osc.Relay(udp, socketPort, {
         raw: true
     });
 });
+
+/*---- Set up UDP establish ----*/
+var udp = new osc.UDPPort({
+    localAddress: "0.0.0.0",
+    localPort: 7400,
+    remoteAddress: "192.168.31.2",
+    remotePort: 7500
+});
+
+udp.on("ready", function () {
+    var ipAddresses = getIPAddresses();
+    console.log("UDP(ready):");
+    console.log("\tlisten from:");
+    ipAddresses.forEach(function (address) {
+        console.log("\t" + address + ":", udp.options.localPort);
+    });
+    console.log("\tsend to:");
+    console.log("\t" + udp.options.remoteAddress + ":", udp.options.remotePort);
+});
+
+udp.open();
