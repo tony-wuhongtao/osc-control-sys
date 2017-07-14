@@ -50,7 +50,6 @@ function draw() {
     image(bgimg, windowWidth/2, windowHeight/2, windowWidth, windowHeight);
     gallery.render();
   }
-ellipse(mouseX, mouseY, 4, 4);
 }
 
 

@@ -1,6 +1,6 @@
 function D3Transport() {
-  this.wsAddress = "127.0.0.1";
-  this.wsPort = 8090;
+  this.wsAddress = "localhost";
+  this.wsPort = 8081;
   this.port = new osc.WebSocketPort({
     // the server IP
       url: "ws://" + this.wsAddress + ":" + this.wsPort
@@ -18,7 +18,7 @@ function D3Transport() {
     this.port.on("error", function (error) {
       console.log("WebsocketBrowser(error)");
       console.log("\t" + error);
-    })
+    });
 
   };
 
