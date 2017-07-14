@@ -18,7 +18,7 @@ app.get('/', function (req, res) {
   res.sendFile(path.join(__dirname+'/index.html'));
 });
 
-// listen on port 8080
+// listen localhost on port 8080
 app.listen(8080, function () {
   console.log("http server running at http://127.0.0.1:8080/");
 });
