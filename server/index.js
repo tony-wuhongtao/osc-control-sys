@@ -55,32 +55,33 @@ var udp = new osc.UDPPort({
 
 udp.on("ready", function () {
     var ipAddresses = getIPAddresses();
-    console.log("===Receive====");
-    console.log("Listening for OSC over UDP.");
+    console.log("UDP(ready):");
+    console.log("\tlisten from:");
     ipAddresses.forEach(function (address) {
-        console.log(" Host:", address + ", Port:", udp.options.localPort);
+        console.log("\t" + address + ":", udp.options.localPort);
     });
-    console.log("==============");
-    console.log("=====Send=====");
-    console.log("Broadcasting OSC over UDP to", udp.options.remoteAddress + ", Port:", udp.options.remotePort);
+    console.log("\tsend to:");
+    console.log("\t" + udp.options.remoteAddress + ":", udp.options.remotePort);
 });
 
 udp.open();
 
 
 /*---- Setup WebSocket establish ----*/
+var wsPort = 8081;
 var wss = new WebSocket.Server({
-    port: 8081
+    port: wsPort
 });
 
 wss.on("connection", function (socket) {
-    console.log("A Web Socket connection has been established!");
+    console.log("WebSocketServer:(connection established)");
+    console.log("\tlisten from:" + wsPort);
     var socketPort = new osc.WebSocketPort({
         socket: socket
     });
 
     socketPort.on("message", function (oscMsg) {
-      console.log("An OSC message was received: " + oscMsg);
+      console.log("WebSocketServer:(OSC message received) " + oscMsg.address + " " + oscMsg.args);
     });
 
 //relay UDP to WebSocket

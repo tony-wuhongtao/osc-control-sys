@@ -1,12 +1,24 @@
 function D3Transport() {
+  this.wsAddress = "127.0.0.1";
+  this.wsPort = 8090;
   this.port = new osc.WebSocketPort({
     // the server IP
-      url: "ws://120.24.91.179:8081"
+      url: "ws://" + this.wsAddress + ":" + this.wsPort
   });
 
   D3Transport.prototype.init = function () {
-    console.log("open port");
+    console.log("WebsocketBrowser(open):");
+    console.log("\tconnect to: ws://" + this.wsAddress + ":" + this.wsPort);
     this.port.open();
+
+    this.port.on("ready", function () {
+      console.log("WebsocketBrowser(ready): ");
+    });
+
+    this.port.on("error", function (error) {
+      console.log("WebsocketBrowser(error)");
+      console.log("\t" + error);
+    })
 
   };
 
