@@ -3,7 +3,8 @@ var osc = require("osc"),
     http = require("http"),
     url = require('url'),
     path = require('path'),
-    express = require('express');
+    express = require('express'),
+    serverPort = 8080;
 
   // helper function to get local IP address
   var getIPAddresses = function () {
@@ -28,7 +29,10 @@ var osc = require("osc"),
 
 
 /*---- Express server ----*/
-var app = express();
+var app = express(),
+    server = app.listen(serverPort, function () {
+      console.log("http server running, listening to port: " + serverPort);
+    });
 
 // serve static file
 app.use(express.static(path.join(__dirname, '../web')));
@@ -39,15 +43,12 @@ app.get('/', function (req, res) {
   res.sendFile(path.join(__dirname+'/index.html'));
 });
 
-// listen localhost on port 8080
-app.listen(8080, function () {
-  console.log("http server running at http://localhost:8080/");
-});
+
 
 /*---- Setup WebSocket establish ----*/
-var wsPort = 8081;
+//var wsPort = 8080;
 var wss = new WebSocket.Server({
-    port: wsPort
+    server: server
 });
 
 wss.on("connection", function (socket) {

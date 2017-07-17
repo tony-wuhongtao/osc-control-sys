@@ -1,6 +1,9 @@
+/* Usage: set the wsAddress to the websocket server address,
+ * wsPort to server http port or tcp port(if serve no web page) */
+
 function D3Transport() {
   this.wsAddress = "localhost";
-  this.wsPort = 8081;
+  this.wsPort = 8080;
   this.port = new osc.WebSocketPort({
     // the server IP
       url: "ws://" + this.wsAddress + ":" + this.wsPort
