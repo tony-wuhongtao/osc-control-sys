@@ -53,7 +53,7 @@ var wss = new WebSocket.Server({
 
 wss.on("connection", function (socket) {
     console.log("WebSocketServer:(connection established)");
-    console.log("\tlisten from:" + wsPort);
+    console.log("\tlisten from:" + serverPort);
     var socketPort = new osc.WebSocketPort({
         socket: socket
     });
