@@ -1,0 +1,18 @@
+{
+    "name": "osc-control-system",
+    "main": "index.js",
+    "version": "0.0.1",
+    "description": "Middleware service for UDP send OSC messages to Intranet and communicate with Internet.",
+    "author": "Tony Wu",
+    "homepage": "",
+    "repository": {
+        "type": "git",
+        "url": ""
+    },
+    "dependencies": {
+        "express": "^4.15.3",
+        "np-scrollp": "^2.0.2",
+        "osc": "2.2.0",
+        "ws": "1.1.0"
+    }
+}
