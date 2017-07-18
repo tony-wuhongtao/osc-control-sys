@@ -46,9 +46,10 @@ app.get('/', function (req, res) {
 
 
 /*---- Setup WebSocket establish ----*/
-//var wsPort = 8080;
+var wsPort = 8090;
 var wss = new WebSocket.Server({
-    server: server
+//    server: server
+      port: wsPort
 });
 
 wss.on("connection", function (socket) {
