@@ -44,24 +44,40 @@ app.get('/', function (req, res) {
 });
 
 /*---- Setup WebSocket establish ----*/
+var localSocket;
+var browserSocket = [];
 var wsPort = 8090;
 var wss = new WebSocket.Server({
       port: wsPort
 });
 
-wss.on("connection", function (socket) {
+wss.on("connection", function (socket, request) {
     console.log("WebSocketServer:(connection established)");
-    console.log("\tlisten from:" + serverPort);
     var socketPort = new osc.WebSocketPort({
         socket: socket
     });
-
     socketPort.on("message", function (oscMsg) {
-      console.log("WebSocketServer:(OSC message received) " + oscMsg.address + " " + oscMsg.args);
-      var destnation = oscMsg.address.split('/')[1];
-      if (destnation == "d3") {
-        this.send(oscMsg);
+      var address = oscMsg.address.split('/');
+      // check identity
+      if (address[1] == "whoami") {
+        if (oscMsg.args == "browser") {
+          console.log("WebSocketServer:(browser connected)");
+          browserSocket.push(this);
+        } else if (oscMsg.args == "local") {
+          console.log("WebSocketServer:(local server connected)");
+          localSocket = this;
+        }
       }
+      if (localSocket) {
+        if (address[1] == "d3") {
+          console.log("WebSocketServer:(OSC message received): " + oscMsg.address + " " + oscMsg.args);
+          localSocket.send(oscMsg);
+        }
+      } else {
+        console.log("WebSocketServer:(no local server connected)");
+      }
+
+      console.log("WebSocketServer:(OSC message received) " + oscMsg.address + " " + oscMsg.args);
     });
 
 });

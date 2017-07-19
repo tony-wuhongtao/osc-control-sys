@@ -20,7 +20,7 @@ function D3Transport() {
     var that = this;
     this.port.on("ready", function () {
       that.port.send({
-        address: "/server/whoami",
+        address: "/whoami",
         args: [
         {
           type: "s",

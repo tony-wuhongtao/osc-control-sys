@@ -1,6 +1,5 @@
 var osc = require("osc"),
     WebSocket = require("ws");
-    path = require('path');
 
   // helper function to get local IP address
   var getIPAddresses = function () {
@@ -23,50 +22,12 @@ var osc = require("osc"),
       return ipAddresses;
   };
 
-
-
-/*---- Setup WebSocket establish ----*/
-var wsPort = 9000;
-var wss = new WebSocket.Server({
-//    server: server
-      port: wsPort
-});
-
-wss.on("connection", function (socket) {
-    console.log("WebSocketServer:(connection established)");
-    console.log("\tlisten from:" + serverPort);
-    var socketPort = new osc.WebSocketPort({
-        socket: socket
-    });
-
-    socketPort.on("ready", function () {
-      this.port.send({
-        address: "/server/whoami",
-        args: [
-        {
-          type: "s",
-          value: "local"
-        }]
-      });
-      console.log("WebsocketBrowser(ready): identify self");
-    });
-
-    socketPort.on("message", function (oscMsg) {
-      console.log("WebSocketServer:(OSC message received) " + oscMsg.address + " " + oscMsg.args);
-    });
-
-//relay UDP to WebSocket
-    var relay = new osc.Relay(udp, socketPort, {
-        raw: true
-    });
-});
-
 /*---- Set up UDP establish ----*/
 var udp = new osc.UDPPort({
     localAddress: "0.0.0.0",
     localPort: 7400,
     //D3 local IP address
-    remoteAddress: "192.168.31.2",
+    remoteAddress: "192.168.1.20",
     //D3 local port
     remotePort: 7500
 });
@@ -83,3 +44,57 @@ udp.on("ready", function () {
 });
 
 udp.open();
+
+udp.on("message", function (oscMsg) {
+	console.log(oscMsg.address + " " + oscMsg.args);
+});
+
+udp.on("error", function (error) {
+	console.log("UDP(error): " + error);
+});
+
+
+process.on("uncaughtException", function (err) {
+	console.log(err);
+});
+
+
+/*---- Setup WebSocket establish ----*/
+var wsPort = 8090;
+var wsAddress = "192.168.1.20";
+
+var oscPort = new osc.WebSocketPort({
+      url: "ws://" + wsAddress + ":" + wsPort,
+	metadata: true
+});
+
+
+oscPort.open();
+console.log("WebsocketLocal(open):");
+console.log("\tconnet to ws://" + wsAddress + ":" + wsPort);
+
+oscPort.on("ready", function() {
+	oscPort.send({
+		address: "/whoami",
+		args: [
+		{
+			type: "s",
+			value: "local"
+		}]
+	});
+
+  //relay UDP to WebSocket
+  var relay = new osc.Relay(oscPort, udp, {
+    // specifically set raw to false to send osc message
+  	raw: false
+  });
+	console.log("WebSocketLocal(read): identify self");
+});
+
+oscPort.on("message", function(oscMsg) {
+	console.log("WebsocketLocal(message): " + oscMsg.address + " " + oscMsg.args);
+});
+
+oscPort.on("error", function(error) {
+	console.log("WebsocketLocal(error): " + error);
+});
