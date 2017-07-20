@@ -6,26 +6,26 @@ var osc = require("osc"),
     express = require('express'),
     serverPort = 8080;
 
-  // helper function to get local IP address
-  var getIPAddresses = function () {
-      var os = require("os"),
-      interfaces = os.networkInterfaces(),
-      ipAddresses = [];
+// helper function to get local IP address
+var getIPAddresses = function () {
+    var os = require("os"),
+    interfaces = os.networkInterfaces(),
+    ipAddresses = [];
 
-      for (var deviceName in interfaces){
-          var addresses = interfaces[deviceName];
+    for (var deviceName in interfaces){
+        var addresses = interfaces[deviceName];
 
-          for (var i = 0; i < addresses.length; i++) {
-              var addressInfo = addresses[i];
+        for (var i = 0; i < addresses.length; i++) {
+            var addressInfo = addresses[i];
 
-              if (addressInfo.family === "IPv4" && !addressInfo.internal) {
-                  ipAddresses.push(addressInfo.address);
-              }
-          }
-      }
+            if (addressInfo.family === "IPv4" && !addressInfo.internal) {
+                ipAddresses.push(addressInfo.address);
+            }
+        }
+    }
 
-      return ipAddresses;
-  };
+    return ipAddresses;
+};
 
 
 /*---- Express server ----*/
@@ -67,17 +67,18 @@ wss.on("connection", function (socket, request) {
           console.log("WebSocketServer:(local server connected)");
           localSocket = this;
         }
-      }
-      if (localSocket) {
-        if (address[1] == "d3") {
+      } else if (address[1] == "d3") {
+        if (localSocket) {
           console.log("WebSocketServer:(OSC message received): " + oscMsg.address + " " + oscMsg.args);
+          //console.log(oscMsg.args);
           localSocket.send(oscMsg);
+          console.log("WebSocketServer:(OSC message send): forward to local server");
+        } else {
+          console.log("WebSocketServer:(no local server connected)");
         }
       } else {
-        console.log("WebSocketServer:(no local server connected)");
+        console.log("WebSocketServer:(unused OSC message received): " + oscMsg.address + " " + oscMsg.args);
       }
-
-      console.log("WebSocketServer:(OSC message received) " + oscMsg.address + " " + oscMsg.args);
     });
 
 });

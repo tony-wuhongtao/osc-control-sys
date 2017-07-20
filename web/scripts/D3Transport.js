@@ -6,7 +6,7 @@ function D3Transport() {
   //localhost mode: 127.0.0.1
   //local network mode: this machine's local network ip ie:192.168.1.10
   //public network mode: server IP ie:120.24.91.179
-  this.wsAddress = "127.0.0.1";
+  this.wsAddress = window.location.hostname;
   this.wsPort = 8090;
   this.port = new osc.WebSocketPort({
     // the server IP
