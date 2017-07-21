@@ -42,5 +42,4 @@ the file also contains a **webSocket** client to send or receive OSC message bet
 ## TO-DO
 * bash script to automate deployment
 * integrate 'hammer.js' gesture recognition
-* add a loading screen
 * compress the image file and replace the .js with .min.js to reduce the loading time
