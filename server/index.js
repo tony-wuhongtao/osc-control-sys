@@ -68,7 +68,7 @@ wss.on("connection", function (socket, request) {
         }
       // forward message to local server
       } else if (address[1] == "d3") {
-        if (localSocket && localSocket.socket.isAlive) {
+        if (localSocket) {
           console.log("WebSocketServer:(OSC message received): " + oscMsg.address + " " + oscMsg.args);
           //console.log(oscMsg.args);
           localSocket.send(oscMsg);
