@@ -128,6 +128,16 @@ oscPort.on("ready", function() {
 
 oscPort.on("message", function(oscMsg) {
 	console.log("WebsocketLocal(OSC message received): " + oscMsg.address + " " + oscMsg.args);
+  //send animation finished message back to web server when animation finished
+  setTimeOut(function () {
+    oscPort.send({
+      address: "/finished",
+      args: [{
+        type: "i",
+        value: "1"
+      }]
+    });
+  }, 5000);
 });
 
 oscPort.on("error", function(error) {
