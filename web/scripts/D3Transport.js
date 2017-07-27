@@ -32,6 +32,12 @@ function D3Transport() {
 
     this.port.on("message", function (oscMsg) {
       console.log("WebSocketServer:(OSC message received) " + oscMsg.address + " " + oscMsg.args);
+      var address = oscMsg.address.split('/');
+      if (address[1] == "queueLength") {
+        console.log(oscMsg.args[0]);
+        gallery.queue = oscMsg.args[0];
+
+      }
     });
 
     this.port.on("error", function (error) {

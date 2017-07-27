@@ -70,6 +70,7 @@ function Gallery(n) {
   // gallery status flags
   this.launched = false;
   this.triggered = false;
+  this.queue = 0;
 
   // floaters array
   this.floaters = new Array(n);
@@ -105,7 +106,8 @@ function Gallery(n) {
     }
   };
 
-  Gallery.prototype.render = function () {
+  Gallery.prototype.renderFloaters = function () {
+    // render floaters
     for (var i = 0; i < this.floaters.length; i++) {
       var floater = this.floaters[i];
 
@@ -161,14 +163,6 @@ function Gallery(n) {
         fill(255, 0, 0);
         stroke(0);
         strokeWeight(4);
-        // animation text
-        /*
-        var achar = "再来一发";
-        var cHeight = 80;
-        textSize(cHeight);
-        var cWidth = textWidth(achar);
-        this.text = text(achar, windowWidth/2, windowHeight/3);
-        */
         push();
         translate(windowWidth/2, windowHeight/3);
         rotate(rlimg.rotateAngle);
@@ -188,8 +182,27 @@ function Gallery(n) {
       floater.checkEdge();
       floater.render();
     }
+    };
   };
 
+  Gallery.prototype.render = function () {
+    var achar = "";
+    if (this.queue == 0) {
+      achar = "请点亮您的灯笼";
+      this.renderFloaters();
+    } else {
+      achar = "您前面还有\n" + this.queue + "盏灯笼等待点亮";
+    }
+
+    // render hint
+    if (!this.launched) {
+      fill(255);
+      var cHeight = 80;
+      textSize(cHeight);
+      strokeWeight(8);
+      var cWidth = textWidth(achar);
+      this.text = text(achar, windowWidth/2, windowHeight/3);
+    }
 }
 
 

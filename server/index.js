@@ -66,31 +66,6 @@ wss.on("connection", function (socket, request) {
         case "whoami":
           if (oscMsg.args == "browser") {
             console.log("WebSocketServer:(browser connected)");
-          } else if (oscMsg.args == "local") {
-            console.log("WebSocketServer:(local server connected)");
-            localSocket = this;
-          }
-          break;
-        // if queue is empty then send message else queue the message
-        case "d3":
-          console.log("WebSocketServer:(Current message queue length): " + messages.length);
-          if (messages.length == 0) {
-            if (localSocket) {
-              localSocket.send(oscMsg);
-              console.log("WebSocketServer:(OSC message send): forward to local server");
-            } else {
-              console.log("WebSocketServer:(no local server connected)");
-              this.send({
-                address: "/error",
-                args: [{
-                  type: "s",
-                  value: "nolocalserver"
-                }]
-              });
-            }
-          } else {
-            messages.push(oscMsg);
-            console.log("WebSocketServer:(queue message)");
             // send queue length back to browser
             this.send({
               address: "/queueLength",
@@ -99,17 +74,17 @@ wss.on("connection", function (socket, request) {
                 value: messages.length
               }]
             });
+          } else if (oscMsg.args == "local") {
+            console.log("WebSocketServer:(local server connected)");
+            localSocket = this;
           }
           break;
-        // send message and dequeue messages array
-        case "finished":
-          // if queue is not empty, send queued message to local server
-          if (messages.length != 0) {
+        // if queue is empty then send message else queue the message
+        case "d3":
+          if (messages.length == 0) {
             if (localSocket) {
-              console.log("WebSocketServer:(OSC message received): " + oscMsg.address + " " + oscMsg.args);
-              //console.log(oscMsg.args);
-              localSocket.send(messages[0]);
-              console.log("WebSocketServer:(OSC message send): forward to local server");
+              localSocket.send(oscMsg);
+              console.log("WebSocketServer:(OSC message send): send to local server");
             } else {
               console.log("WebSocketServer:(no local server connected)");
               this.send({
@@ -120,9 +95,35 @@ wss.on("connection", function (socket, request) {
                 }]
               });
             }
-            // dequeue messages array
-            messages.unshift();
-            console.log("WebSocketServer:(dequeue message)");
+          }
+          // queue the message
+          messages.unshift(oscMsg);
+          console.log("WebSocketServer:(queue message)");
+          console.log("WebSocketServer:(message queue length): " + messages.length);
+          break;
+        // send message and dequeue messages array
+        case "finished":
+          // dequeue messages array
+          messages.pop();
+          console.log("WebSocketServer:(dequeue message)");
+          console.log("WebSocketServer:(message queue length): " + messages.length);
+          // if queue is not empty, send queued message to local server
+          if (messages.length != 0) {
+            if (localSocket) {
+              //console.log(oscMsg.args);
+              localSocket.send(messages[0]);
+              console.log("WebSocketServer:(OSC message send): send to local server");
+            } else {
+              console.log("WebSocketServer:(no local server connected)");
+              this.send({
+                address: "/error",
+                args: [{
+                  type: "s",
+                  value: "nolocalserver"
+                }]
+              });
+            }
+
           }
           break;
         // receive unused address
