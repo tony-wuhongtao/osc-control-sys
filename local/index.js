@@ -105,7 +105,6 @@ var oscPort = new osc.WebSocketPort({
 	//metadata: true
 });
 
-
 oscPort.open();
 console.log("WebsocketLocal(open):");
 console.log("\tconnet to ws://" + wsAddress + ":" + wsPort);
@@ -129,7 +128,7 @@ oscPort.on("ready", function() {
 oscPort.on("message", function(oscMsg) {
 	console.log("WebsocketLocal(OSC message received): " + oscMsg.address + " " + oscMsg.args);
   //send animation finished message back to web server when animation finished
-  setTimeOut(function () {
+  setTimeout(function () {
     oscPort.send({
       address: "/finished",
       args: [{
@@ -137,7 +136,7 @@ oscPort.on("message", function(oscMsg) {
         value: "1"
       }]
     });
-  }, 5000);
+  }, 10000);
 });
 
 oscPort.on("error", function(error) {
