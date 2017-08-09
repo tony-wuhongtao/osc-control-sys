@@ -1,5 +1,13 @@
+
+/**
+ *  local/index.js This file is the local server main file.
+ *  Usage: node local/. [udp-remote-ip=your.udp.remote.ip] [websocket-ip=your.web.socket.ip]
+ *  the default udp-remote-ip is set to 127.0.0.1
+ *  the default websocket-ip is set to 127.0.0.1
+ */
 var osc = require("osc"),
-    WebSocket = require("ws");
+    WebSocket = require("ws"),
+    telnet = require("telnet-client");
 
 //handle script arguments
 var handleArgs = function() {
@@ -34,7 +42,9 @@ var handleArgs = function() {
 }();
 
 process.on("uncaughtException", function (err) {
-	console.log("An Error has occured: " + err.code);
+  if (err) {
+    console.log("Uncaught error has occured: " + err);
+  }
 });
 
 
@@ -142,3 +152,71 @@ oscPort.on("message", function(oscMsg) {
 oscPort.on("error", function(error) {
 	console.log("WebsocketLocal(error): " + error);
 });
+
+/**
+ * Telnet client command and query example for d3
+ */
+
+/*---- Setup Telnet establish ----*/
+ /*
+var telnetPort = new telnet();
+var telnetRemoteAddress = "192.168.1.12";
+var telnetRemotePort = 54321;
+
+var cmdObject = {
+  request: 13,
+  track_command: {
+    command: "play",
+    track: "gamemode:game",
+    location: "00:00:15:00",
+    player: "gamemode:game",
+    transition: 10,
+    //brightness: 0,
+    //volume: 0
+  }
+};
+var queryObject = {
+  request: 1,
+  query: {
+    q: "trackList"
+  }
+};
+var cmd = JSON.stringify(cmdObject);
+var query = JSON.stringify(queryObject);
+
+var params = {
+  host: telnetRemoteAddress,
+  port: telnetRemotePort,
+  //shellPrompt: '/ # ',
+  timeout: 1500
+};
+
+telnetPort.on('connect', function() {
+  console.log('TelnetLocal(connected)');
+  console.log("TelnetLocal(send)");
+  console.log(cmd);
+  telnetPort.send(cmd, function (err, response) {
+    console.log(err + " cmd response: " + response);
+  });
+
+});
+
+telnetPort.on('ready', function(prompt) {
+  console.log("TelnetLocal(ready)");
+});
+
+telnetPort.on('timeout', function() {
+  console.log('TelnetLocal(timeout)');
+  console.log(query);
+  telnetPort.send(query, function (err, response) {
+    console.log(err + " query response: " + response);
+  });
+});
+
+telnetPort.on('close', function() {
+  console.log('TelnetLocal(closed)');
+});
+
+telnetPort.connect(params);
+console.log("TelnetLocal(start connection)");
+*/

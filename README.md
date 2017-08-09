@@ -20,7 +20,8 @@ Middleware service for UDP send OSC messages to Intranet and communicate with In
 ### Local Server side
 the local server mainly side consist of 2 parts
 * the **webSocket** client to send or receive OSC messages between local server and online server
-* and the **UDP** connection establish OSC connection between server and D3
+* the **UDP** connection establish OSC connection between server and D3
+* the **Telnet** client send commands and queries to D3 telnet server, mostly to control d3's multitransport
 
 ### Server side
 the server side consist of three parts in 'index.js' file,
@@ -32,7 +33,7 @@ the server side consist of three parts in 'index.js' file,
 the browser side consist of 2 parts
 * the 'D3Transport.js' file wrap the D3 OSC control command set into a class
 the file also contains a **webSocket** client to send or receive OSC message between browser and online server
-* the 'sketch.js' file provide the user interactive interface to trigger OSC command
+* the 'sketch.js' file provide the user interactive interface to trigger OSC command, when multiple browsers trigger the animation of large screen, the request is queued.
 
 ---
 ## Misc

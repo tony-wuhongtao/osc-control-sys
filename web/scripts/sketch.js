@@ -66,6 +66,13 @@ function touchEnded() {
   return false;
 }
 
+
+/**
+ * Gallery - class for holding and animating floaters
+ *
+ * @param  n - how many floaters to hold
+ * @return {type}   description
+ */
 function Gallery(n) {
   // gallery status flags
   this.launched = false;
