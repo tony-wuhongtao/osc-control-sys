@@ -7,3 +7,9 @@ function cue() {
 document.body.addEventListener('touchmove',function(event){
   event.preventDefault();
 });
+
+
+function resizeLoadingImage(img) {
+  img.height = window.innerHeight;
+  img.width = window.innerWidth;
+}

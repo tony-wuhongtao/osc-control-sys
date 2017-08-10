@@ -1,6 +1,13 @@
+/* Usage: set the wsAddress to the websocket server address,
+ * wsPort to server http port or tcp port(if serve no web page) */
+
 function D3Transport() {
-  this.wsAddress = "localhost";
-  this.wsPort = 8081;
+  //wsAddress settings
+  //localhost mode: 127.0.0.1
+  //local network mode: this machine's local network ip ie:192.168.1.10
+  //public network mode: server IP ie:120.24.91.179
+  this.wsAddress = window.location.hostname;
+  this.wsPort = 8090;
   this.port = new osc.WebSocketPort({
     // the server IP
       url: "ws://" + this.wsAddress + ":" + this.wsPort
@@ -10,15 +17,35 @@ function D3Transport() {
     console.log("WebsocketBrowser(open):");
     console.log("\tconnect to: ws://" + this.wsAddress + ":" + this.wsPort);
     this.port.open();
-
+    var that = this;
     this.port.on("ready", function () {
-      console.log("WebsocketBrowser(ready): ");
+      that.port.send({
+        address: "/whoami",
+        args: [
+        {
+          type: "s",
+          value: "browser"
+        }]
+      });
+      console.log("WebsocketBrowser(ready): identify self");
+    });
+
+    this.port.on("message", function (oscMsg) {
+      console.log("WebSocketServer:(OSC message received) " + oscMsg.address + " " + oscMsg.args);
+      var address = oscMsg.address.split('/');
+      if (address[1] == "queueLength") {
+        console.log(oscMsg.args[0]);
+        gallery.queue = oscMsg.args[0];
+
+      }
     });
 
     this.port.on("error", function (error) {
       console.log("WebsocketBrowser(error)");
       console.log("\t" + error);
     });
+
+
 
   };
 

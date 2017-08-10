@@ -3,32 +3,36 @@ var osc = require("osc"),
     http = require("http"),
     url = require('url'),
     path = require('path'),
-    express = require('express');
+    express = require('express'),
+    serverPort = 8080;
 
-  // helper function to get local IP address
-  var getIPAddresses = function () {
-      var os = require("os"),
-      interfaces = os.networkInterfaces(),
-      ipAddresses = [];
+// helper function to get local IP address
+var getIPAddresses = function () {
+    var os = require("os"),
+    interfaces = os.networkInterfaces(),
+    ipAddresses = [];
 
-      for (var deviceName in interfaces){
-          var addresses = interfaces[deviceName];
+    for (var deviceName in interfaces){
+        var addresses = interfaces[deviceName];
 
-          for (var i = 0; i < addresses.length; i++) {
-              var addressInfo = addresses[i];
+        for (var i = 0; i < addresses.length; i++) {
+            var addressInfo = addresses[i];
 
-              if (addressInfo.family === "IPv4" && !addressInfo.internal) {
-                  ipAddresses.push(addressInfo.address);
-              }
-          }
-      }
+            if (addressInfo.family === "IPv4" && !addressInfo.internal) {
+                ipAddresses.push(addressInfo.address);
+            }
+        }
+    }
 
-      return ipAddresses;
-  };
+    return ipAddresses;
+};
 
 
 /*---- Express server ----*/
-var app = express();
+var app = express(),
+    server = app.listen(serverPort, function () {
+      console.log("http server running, listening to port: " + serverPort);
+    });
 
 // serve static file
 app.use(express.static(path.join(__dirname, '../web')));
@@ -39,51 +43,92 @@ app.get('/', function (req, res) {
   res.sendFile(path.join(__dirname+'/index.html'));
 });
 
-// listen localhost on port 8080
-app.listen(8080, function () {
-  console.log("http server running at http://localhost:8080/");
-});
-
 /*---- Setup WebSocket establish ----*/
-var wsPort = 8081;
+var localSocket;
+// browser socket queue
+var messages = [];
+var wsPort = 8090;
 var wss = new WebSocket.Server({
-    port: wsPort
+      port: wsPort
 });
 
-wss.on("connection", function (socket) {
+wss.on("connection", function (socket, request) {
     console.log("WebSocketServer:(connection established)");
-    console.log("\tlisten from:" + wsPort);
     var socketPort = new osc.WebSocketPort({
         socket: socket
     });
 
     socketPort.on("message", function (oscMsg) {
-      console.log("WebSocketServer:(OSC message received) " + oscMsg.address + " " + oscMsg.args);
-    });
+      console.log("WebSocketServer:(OSC message received): " + oscMsg.address + " " + oscMsg.args);
+      var address = oscMsg.address.split('/');
+      switch (address[1]) {
+        // check identity and feed info back to browser
+        case "whoami":
+          if (oscMsg.args == "browser") {
+            console.log("WebSocketServer:(browser connected)");
+            // send queue length back to browser
+            this.send({
+              address: "/queueLength",
+              args: [{
+                type: "i",
+                value: messages.length
+              }]
+            });
+          } else if (oscMsg.args == "local") {
+            console.log("WebSocketServer:(local server connected)");
+            localSocket = this;
+          }
+          break;
+        // if queue is empty then send message else queue the message
+        case "d3":
+          if (messages.length == 0) {
+            if (localSocket) {
+              localSocket.send(oscMsg);
+              console.log("WebSocketServer:(OSC message send): send to local server");
+            } else {
+              console.log("WebSocketServer:(no local server connected)");
+              this.send({
+                address: "/error",
+                args: [{
+                  type: "s",
+                  value: "nolocalserver"
+                }]
+              });
+            }
+          }
+          // queue the message
+          messages.unshift(oscMsg);
+          console.log("WebSocketServer:(queue message)");
+          console.log("WebSocketServer:(message queue length): " + messages.length);
+          break;
+        // send message and dequeue messages array
+        case "finished":
+          // dequeue messages array
+          messages.pop();
+          console.log("WebSocketServer:(dequeue message)");
+          console.log("WebSocketServer:(message queue length): " + messages.length);
+          // if queue is not empty, send queued message to local server
+          if (messages.length != 0) {
+            if (localSocket) {
+              //console.log(oscMsg.args);
+              localSocket.send(messages[0]);
+              console.log("WebSocketServer:(OSC message send): send to local server");
+            } else {
+              console.log("WebSocketServer:(no local server connected)");
+              this.send({
+                address: "/error",
+                args: [{
+                  type: "s",
+                  value: "nolocalserver"
+                }]
+              });
+            }
 
-//relay UDP to WebSocket
-    var relay = new osc.Relay(udp, socketPort, {
-        raw: true
+          }
+          break;
+        // receive unused address
+        default:
+          console.log("WebSocketServer:(unused OSC message received): " + oscMsg.address + " " + oscMsg.args);
+      }
     });
 });
-
-/*---- Set up UDP establish ----*/
-var udp = new osc.UDPPort({
-    localAddress: "0.0.0.0",
-    localPort: 7400,
-    remoteAddress: "192.168.31.2",
-    remotePort: 7500
-});
-
-udp.on("ready", function () {
-    var ipAddresses = getIPAddresses();
-    console.log("UDP(ready):");
-    console.log("\tlisten from:");
-    ipAddresses.forEach(function (address) {
-        console.log("\t" + address + ":", udp.options.localPort);
-    });
-    console.log("\tsend to:");
-    console.log("\t" + udp.options.remoteAddress + ":", udp.options.remotePort);
-});
-
-udp.open();

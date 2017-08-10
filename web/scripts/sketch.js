@@ -10,26 +10,13 @@ var gallery = new Gallery(3);
 var imgs = new Array(3);
 
 function preload() {
-  loadingimg = loadImage('assets/loading.gif', function () {
-    loadingCount++;
-    if (loadingCount == 5) {
-      loading = false;
-    }
-  });
   for (var i = 0; i < imgs.length; i++) {
-    imgs[i] = loadImage('assets/' + 'lantern' + i + '.png', function () {
-      loadingCount++;
-      if (loadingCount == 5) {
-        loading = false;
-      }
-    });
+    imgs[i] = loadImage('assets/' + 'lantern' + i + '.png');
   }
-  bgimg =loadImage('assets/background.png', function () {
-    loadingCount++;
-    if (loadingCount == 5) {
-      loading = false;
-    }
-  });
+  bgimg = loadImage('assets/background.png');
+  rlimg = loadImage('assets/reload.png');
+  rlimg.rotateAngle = 0;
+  rlimg.angleInc = 0.05;
 }
 
 function setup() {
@@ -44,12 +31,8 @@ function setup() {
 }
 
 function draw() {
-  if (loading) {
-    image(loadingimg, windowWidth/2, windowHeight/2, windowWidth, windowHeight);
-  } else {
-    image(bgimg, windowWidth/2, windowHeight/2, windowWidth, windowHeight);
-    gallery.render();
-  }
+  image(bgimg, windowWidth/2, windowHeight/2, windowWidth, windowHeight);
+  gallery.render();
 }
 
 
@@ -73,24 +56,28 @@ function touchEnded() {
     gallery.swipe(1); // swite right
   }
 
-  /*
-  if (gallery.launched) {
-    if (mouseX > windowWidth/2 - cWidth/2 && mouseX < windowWidth/2 + cWidth/2 &&
-        mouseY > windowHeight/3 - cHeight/2 && mouseX < windowHeight/3 + cHeight/2) {
+  if (gallery.triggered) {
+    console.log(windowWidth/2 - rlimg.width/2);
+    if (mouseX > (windowWidth/2 - rlimg.width/2) && mouseX < (windowWidth/2 + rlimg.width/2) &&
+        mouseY > (windowHeight/3 - rlimg.height/2) && mouseY < (windowHeight/3 + rlimg.height/2)) {
           window.location.reload();
     }
   }
-  */
   return false;
 }
 
 
-
-
+/**
+ * Gallery - class for holding and animating floaters
+ *
+ * @param  n - how many floaters to hold
+ * @return {type}   description
+ */
 function Gallery(n) {
   // gallery status flags
   this.launched = false;
   this.triggered = false;
+  this.queue = 0;
 
   // floaters array
   this.floaters = new Array(n);
@@ -126,7 +113,8 @@ function Gallery(n) {
     }
   };
 
-  Gallery.prototype.render = function () {
+  Gallery.prototype.renderFloaters = function () {
+    // render floaters
     for (var i = 0; i < this.floaters.length; i++) {
       var floater = this.floaters[i];
 
@@ -182,12 +170,13 @@ function Gallery(n) {
         fill(255, 0, 0);
         stroke(0);
         strokeWeight(4);
-        // animation text
-        var achar = "再来一发";
-        var cHeight = 80;
-        textSize(cHeight);
-        var cWidth = textWidth(achar);
-        text(achar, windowWidth/2, windowHeight/3);
+        push();
+        translate(windowWidth/2, windowHeight/3);
+        rotate(rlimg.rotateAngle);
+        image(rlimg, 0, 0);
+        rlimg.rotateAngle += rlimg.angleInc;
+        pop();
+        //rect(windowWidth/2, windowHeight/3, 200, 200);
 
 
         if (!this.triggered) {
@@ -200,8 +189,27 @@ function Gallery(n) {
       floater.checkEdge();
       floater.render();
     }
+    };
   };
 
+  Gallery.prototype.render = function () {
+    var achar = "";
+    if (this.queue == 0) {
+      achar = "请点亮您的灯笼";
+      this.renderFloaters();
+    } else {
+      achar = "您前面还有\n" + this.queue + "盏灯笼等待点亮";
+    }
+
+    // render hint
+    if (!this.launched) {
+      fill(255);
+      var cHeight = 80;
+      textSize(cHeight);
+      strokeWeight(8);
+      var cWidth = textWidth(achar);
+      this.text = text(achar, windowWidth/2, windowHeight/3);
+    }
 }
 
 
